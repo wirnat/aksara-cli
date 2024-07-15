@@ -89,7 +89,8 @@ Flags:
 
 Options:
   --source-path <source_path>   Directory or Git repository containing the migration files (*.go) to build into plugins. Can be specified multiple times.
-  --output-path <output_path>   Directory to store the built plugin files (default: ./plugins).`
+  --output-path <output_path>   Directory to store the built plugin files (default: ./plugins).
+  --rebuild                     Rebuild all plugins and remove existing .so files before building.`
 
 func replaceCLIName(template, cliName string) string {
 	return strings.ReplaceAll(template, "{cli_name}", cliName)

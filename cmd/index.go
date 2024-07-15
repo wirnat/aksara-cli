@@ -135,5 +135,6 @@ func init() {
 
 	migrateBuild.Flags().StringArrayVar(&sourcePaths, "source-path", []string{}, "Directories containing the migration files (*.go) to build into plugins. Can be specified multiple times.")
 	migrateBuild.Flags().StringVar(&outputPath, "output-path", "", "Directory to store the built plugin files (default: ./plugins)")
+	migrateBuild.Flags().BoolVar(&rebuild, "rebuild", false, "Rebuild all migration plugins and remove existing .so files before building")
 
 }

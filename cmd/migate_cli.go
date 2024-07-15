@@ -101,8 +101,20 @@ var migrateBuild = &cobra.Command{
 			logrus.Fatalf("Error creating output directory %s: %v", outputPath, err)
 		}
 
+		// Track processed source paths to skip duplicates
+		processedPaths := make(map[string]bool)
+		// Track processed file names to detect duplicates
+		processedFiles := make(map[string]bool)
+
 		// Iterate through each source path
 		for _, sourcePath := range sourcePaths {
+			// Skip if the source path has been processed before
+			if processedPaths[sourcePath] {
+				fmt.Printf("Skipping duplicate source path: %s\n", sourcePath)
+				continue
+			}
+
+			processedPaths[sourcePath] = true
 			var goFiles []string
 			var sourceDir string
 
@@ -129,22 +141,43 @@ var migrateBuild = &cobra.Command{
 			// Build each .go file into a .so plugin
 			for _, file := range goFiles {
 				baseName := filepath.Base(file)
-				outputName := strings.TrimSuffix(baseName, ".go") + ".so"
-				outputFilePath := filepath.Join(outputPath, outputName)
 
-				buildCmd := []string{"build", "-buildmode=plugin", "-o", outputFilePath}
-				buildCmd = append(buildCmd, strings.Fields(buildCommand)...)
-				buildCmd = append(buildCmd, file)
-
-				xcmd := exec.Command(goPath, buildCmd...)
-				xcmd.Dir = sourceDir
-
-				output, err := xcmd.CombinedOutput()
-				if err != nil {
-					logrus.Fatalf("Error building migration from %s: %v\n%s", file, err, output)
+				// Check for duplicate file names
+				if processedFiles[baseName] {
+					logrus.Fatalf("Duplicate file name detected: %s. Ensure file names are unique across all source paths.", baseName)
 				}
 
-				fmt.Printf("Built migration: %s\n", outputPath)
+				processedFiles[baseName] = true
+
+				outputName := strings.TrimSuffix(baseName, ".go") + ".so"
+				outputFilePath, err := filepath.Abs(filepath.Join(outputPath, outputName))
+				if err != nil {
+					logrus.Fatalf("Error creating output file %s: %v", outputFilePath, err)
+				}
+
+				fileMigrate, err := filepath.Abs(file)
+				if err != nil {
+					logrus.Fatalf("Error finding migration file %s: %v", fileMigrate, err)
+				}
+
+				if _, err := os.Stat(outputFilePath); os.IsNotExist(err) {
+
+					buildCmd := []string{"build", "-buildmode=plugin", "-o", outputFilePath}
+					buildCmd = append(buildCmd, strings.Fields(buildCommand)...)
+					buildCmd = append(buildCmd, fileMigrate)
+
+					xcmd := exec.Command(goPath, buildCmd...)
+					xcmd.Dir = sourceDir
+
+					output, err := xcmd.CombinedOutput()
+					if err != nil {
+						logrus.Fatalf("Error building migration from %s: %v\n%s", file, err, output)
+					}
+
+					fmt.Printf("Built migration: %s\n", outputName)
+				} else {
+					fmt.Printf("migration plugin already exists, skipping build: %s\n", outputName)
+				}
 			}
 
 			// Clean up downloaded Git repository if applicable
