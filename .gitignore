@@ -1,3 +1,5 @@
 .idea
 cmd.sh
 templates
+migrations
+migrations-out

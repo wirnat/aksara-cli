@@ -75,9 +75,9 @@ var migrateBuild = &cobra.Command{
 	Use:   "build [flags] [--source-path <source_path>]... [--output-path <output_path>]",
 	Short: "Build a plugin from migration files (*.go)",
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) < 1 {
-			logrus.Fatal("require argument migration_files_directory, example: axara migrate build ./migrations ./migrations_output")
-		}
+		//if len(args) < 1 {
+		//	logrus.Fatal("require argument migration_files_directory, example: axara migrate build ./migrations ./migrations_output")
+		//}
 
 		// Check if 'go' command is available
 		goPath, err := exec.LookPath("go")
@@ -136,10 +136,10 @@ var migrateBuild = &cobra.Command{
 				buildCmd = append(buildCmd, strings.Fields(buildCommand)...)
 				buildCmd = append(buildCmd, file)
 
-				cmd := exec.Command(goPath, buildCmd...)
-				cmd.Dir = sourceDir
+				xcmd := exec.Command(goPath, buildCmd...)
+				xcmd.Dir = sourceDir
 
-				output, err := cmd.CombinedOutput()
+				output, err := xcmd.CombinedOutput()
 				if err != nil {
 					logrus.Fatalf("Error building migration from %s: %v\n%s", file, err, output)
 				}

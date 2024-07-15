@@ -1,9 +1,0 @@
-	//@Generate dependencies
-	{{.ModelCamel}}Repo := {{.ModelSnake}}_gorm.New(a.gormDB)
-	{{.ModelCamel}}FetchU := {{.ModelSnake}}_usecase_v1.New{{.Model}}FetchUsecase({{.ModelCamel}}Repo, {{.ModelCamel}}Repo)
-	{{.ModelCamel}}GetU := {{.ModelSnake}}_usecase_v1.New{{.Model}}GetUsecase({{.ModelCamel}}Repo)
-	{{.ModelCamel}}StoreU := {{.ModelSnake}}_usecase_v1.New{{.Model}}StoreUsecase({{.ModelCamel}}Repo)
-	{{.ModelCamel}}DeleteU := {{.ModelSnake}}_usecase_v1.New{{.Model}}DeleteUsecase({{.ModelCamel}}Repo)
-	{{.ModelCamel}}UpdateU := {{.ModelSnake}}_usecase_v1.New{{.Model}}UpdateUsecase({{.ModelCamel}}Repo, {{.ModelCamel}}Repo)
-	{{.ModelCamel}}Rest := {{.ModelSnake}}_http_1.New{{.Model}}Rest({{.ModelCamel}}FetchU, {{.ModelCamel}}GetU, {{.ModelCamel}}DeleteU, {{.ModelCamel}}UpdateU, {{.ModelCamel}}StoreU)
-	{{.ModelCamel}}Rest.Expose(a.echoHTTP)
