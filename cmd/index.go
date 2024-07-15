@@ -1,5 +1,5 @@
 /*
-	Copyright © aksara-tech 2022
+Copyright © aksara-tech 2022
 */
 package cmd
 
@@ -19,8 +19,12 @@ var generatorCmd = &cobra.Command{
 	Use:     "generate",
 	Short:   "Auto generate Design Pattern",
 	Example: "axara generate conf.yaml --models User",
-	Long:    `Some folks say that Design Patterns are dead. How foolish. The Design Patterns book is one of the most important books published in our industry.  The concepts within should be common rudimentary knowledge for all professional programmers.`,
+	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) < 1 {
+			logrus.Fatal("require argument pattern, example: axara generate conf.yaml --models User")
+		}
+
 		app := v1.NewApp(args[0])
 		err := app.Generate()
 		if err != nil {
@@ -38,8 +42,9 @@ var checkVersion = &cobra.Command{
 }
 
 var newConfig = &cobra.Command{
-	Use:   "new",
+	Use:   "new <config_name>",
 	Short: "New Axara Config file",
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 1 {
 			fmt.Println("❌ require argument filename, example: axara new wirnat_arch")
@@ -65,7 +70,7 @@ var newConfig = &cobra.Command{
 }
 
 var getter = &cobra.Command{
-	Use:        "get",
+	Use:        "get <repository_url> <destination_directory>",
 	Aliases:    nil,
 	SuggestFor: nil,
 	Short:      "Get CLI Item from github",
@@ -99,10 +104,36 @@ var getter = &cobra.Command{
 }
 
 func init() {
+	cliName := rootCmd.Name()
+	generatorCmd.Long = replaceCLIName(generatorCmdDesc, cliName)
+	getter.Long = replaceCLIName(getterCmdDesc, cliName)
+	newConfig.Long = replaceCLIName(newConfigDesc, cliName)
+
+	migrateNew.Long = replaceCLIName(migrateNewCmdDesc, cliName)
+	migrateUp.Long = replaceCLIName(migrateUpCmdDesc, cliName)
+	migrateDown.Long = replaceCLIName(migrateDownCmdDesc, cliName)
+	migrateFlush.Long = replaceCLIName(migrateFlushCmdDesc, cliName)
+	migrateFresh.Long = replaceCLIName(migrateFreshCmdDesc, cliName)
+	migrateBuild.Long = replaceCLIName(migrateBuildCmdDesc, cliName)
+
 	rootCmd.AddCommand(generatorCmd)
 	rootCmd.AddCommand(checkVersion)
 	rootCmd.AddCommand(getter)
 	rootCmd.AddCommand(newConfig)
+
+	migrateCmd.AddCommand(migrateNew)
+	migrateCmd.AddCommand(migrateUp)
+	migrateCmd.AddCommand(migrateDown)
+	migrateCmd.AddCommand(migrateFlush)
+	migrateCmd.AddCommand(migrateFresh)
+	migrateCmd.AddCommand(migrateBuild)
+
+	rootCmd.AddCommand(migrateCmd)
+
 	rootCmd.PersistentFlags().StringSliceVarP(&global.Tags, "tags", "g", []string{}, "List of execute traits/jobs")
 	rootCmd.PersistentFlags().StringSliceVarP(&global.ExecuteModels, "models", "m", []string{}, "list of execute models")
+
+	migrateBuild.Flags().StringArrayVar(&sourcePaths, "source-path", []string{}, "Directories containing the migration files (*.go) to build into plugins. Can be specified multiple times.")
+	migrateBuild.Flags().StringVar(&outputPath, "output-path", "", "Directory to store the built plugin files (default: ./plugins)")
+
 }
