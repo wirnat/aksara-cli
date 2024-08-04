@@ -1,0 +1,21 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"github.com/uptrace/bun"
+)
+
+type migration struct {}
+
+func (m migration) MigrateUp(ctx context.Context, tx bun.Tx) error {
+    fmt.Println("implement me")
+    return nil
+}
+
+func (m migration) MigrateDown(ctx context.Context, tx bun.Tx) error {
+    fmt.Println("implement me")
+    return nil
+}
+
+var Migrate migration
